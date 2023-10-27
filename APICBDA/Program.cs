@@ -1,4 +1,5 @@
 using APICBDA.Context;
+using APICBDA.Middlewares;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -27,6 +28,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseMiddleware(typeof(ErrorMiddleware));
 
 app.MapControllers();
 

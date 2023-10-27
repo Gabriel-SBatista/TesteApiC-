@@ -20,8 +20,6 @@ public class SexosController : ControllerBase
 
     public ActionResult<IEnumerable<Sexo>> Get()
     {
-        try
-        {
             var sexos = _context.Sexos.AsNoTracking().ToList();
 
             if (sexos is null)
@@ -29,20 +27,13 @@ public class SexosController : ControllerBase
                 return NotFound();
             }
 
-            return sexos;
-        }
-        catch (Exception)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um problema ao tratar sua solitação.");
-        }     
+            return sexos;   
     }
 
     [HttpGet("{id:int}", Name = "ObterSexo")]
 
     public ActionResult<Sexo> Get(int id)
     {
-        try
-        {
             var sexo = _context.Sexos.AsNoTracking().FirstOrDefault(s => s.SexoId == id);
 
             if (sexo is null)
@@ -50,20 +41,13 @@ public class SexosController : ControllerBase
                 return NotFound("Sexo não encontrado...");
             }
 
-            return sexo;
-        }
-        catch (Exception)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um problema ao tratar sua solitação.");
-        }      
+            return sexo;   
     }
 
     [HttpPost]
 
     public ActionResult Post(Sexo sexo)
     {
-        try
-        {
             if(sexo is null)
             {
                 return BadRequest();
@@ -71,20 +55,13 @@ public class SexosController : ControllerBase
             _context.Sexos.Add(sexo);
             _context.SaveChanges();
 
-            return new CreatedAtRouteResult("ObterSexo", new { id = sexo.SexoId }, sexo);
-        }
-        catch (Exception)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um problema ao tratar sua solitação.");
-        }     
+            return new CreatedAtRouteResult("ObterSexo", new { id = sexo.SexoId }, sexo);   
     }
 
     [HttpPut("{id:int}")]
 
     public ActionResult Put(int id, Sexo sexo)
     {
-        try
-        {
             if (id != sexo.SexoId)
             {
                 return BadRequest();
@@ -93,20 +70,13 @@ public class SexosController : ControllerBase
             _context.Entry(sexo).State = EntityState.Modified;
             _context.SaveChanges();
 
-            return Ok(sexo);
-        }
-        catch (Exception)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um problema ao tratar sua solitação.");
-        }      
+            return Ok(sexo);    
     }
 
     [HttpDelete("{id:int}")]
 
     public ActionResult Delete(int id)
     {
-        try
-        {
             var sexo = _context.Sexos.FirstOrDefault(s => s.SexoId == id);
 
             if (sexo is null)
@@ -117,11 +87,6 @@ public class SexosController : ControllerBase
             _context.Remove(sexo);
             _context.SaveChanges();
 
-            return Ok(sexo);
-        }
-        catch (Exception)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um problema ao tratar sua solitação.");
-        }            
+            return Ok(sexo);          
     }
 }

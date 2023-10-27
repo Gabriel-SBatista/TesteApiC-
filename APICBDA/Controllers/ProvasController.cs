@@ -20,28 +20,21 @@ public class ProvasController : ControllerBase
 
     public ActionResult<IEnumerable<Prova>> Get()
     {
-        try
+        var provas = _context.Provas.AsNoTracking().ToList();
+        if (provas is null)
         {
-            var provas = _context.Provas.AsNoTracking().ToList();
-            if (provas is null)
-            {
-                return NotFound();
-            }
-
-            return provas;
+            return NotFound();
         }
-        catch(Exception)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um problema ao tratar sua solitação.");
-        }   
+
+        return provas;
+        
     }
 
     [HttpGet("{id:int}", Name="ObterProva")]
 
     public ActionResult<Prova> Get(int id)
     {
-        try
-        {
+
             var prova = _context.Provas.AsNoTracking().FirstOrDefault(p => p.ProvaId == id);
             if (prova is null)
             {
@@ -49,39 +42,25 @@ public class ProvasController : ControllerBase
             }
 
             return prova;
-        }
-        catch (Exception)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um problema ao tratar sua solitação.");
-        }       
     }
 
     [HttpPost]
 
     public ActionResult Post(Prova prova)
     {
-        try
-        {
             if (prova is null)
                 return BadRequest();
 
             _context.Provas.Add(prova);
             _context.SaveChanges();
 
-            return new CreatedAtRouteResult("ObterProva", new { id = prova.ProvaId }, prova);
-        }
-        catch(Exception)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um problema ao tratar sua solitação.");
-        }      
+            return new CreatedAtRouteResult("ObterProva", new { id = prova.ProvaId }, prova);    
     }
 
     [HttpPut("{id:int}")]
 
     public ActionResult Put(int id, Prova prova)
     {
-        try
-        {
             if (id != prova.ProvaId)
             {
                 return BadRequest();
@@ -90,19 +69,12 @@ public class ProvasController : ControllerBase
             _context.Entry(prova).State = EntityState.Modified;
             _context.SaveChanges();
 
-            return Ok(prova);
-        }
-        catch(Exception)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um problema ao tratar sua solitação.");
-        }     
+            return Ok(prova);   
     }
 
     [HttpDelete("{id:int}")]
     public ActionResult Delete(int id)
     {
-        try
-        {
             var prova = _context.Provas.FirstOrDefault(p => p.ProvaId == id);
 
             if (prova is null)
@@ -113,11 +85,6 @@ public class ProvasController : ControllerBase
             _context.Remove(prova);
             _context.SaveChanges();
 
-            return Ok(prova);
-        }
-        catch (Exception)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um problema ao tratar sua solitação.");
-        }      
+            return Ok(prova);    
     }
 }
