@@ -1,5 +1,7 @@
 ﻿using APICBDA.Context;
 using APICBDA.Models;
+using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,10 +12,12 @@ namespace APICBDA.Controllers;
 public class ProvasController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IValidator<Prova> _validator;
 
-    public ProvasController(AppDbContext context)
+    public ProvasController(AppDbContext context, IValidator<Prova> validator)
     {
         _context = context;
+        _validator = validator;
     }
 
     [HttpGet]
@@ -27,64 +31,68 @@ public class ProvasController : ControllerBase
         }
 
         return provas;
-        
+
     }
 
-    [HttpGet("{id:int}", Name="ObterProva")]
+    [HttpGet("{id:int}", Name = "ObterProva")]
 
     public ActionResult<Prova> Get(int id)
     {
 
-            var prova = _context.Provas.AsNoTracking().FirstOrDefault(p => p.ProvaId == id);
-            if (prova is null)
-            {
-                return NotFound("Prova não encontrada...");
-            }
+        var prova = _context.Provas.AsNoTracking().FirstOrDefault(p => p.ProvaId == id);
+        if (prova is null)
+        {
+            return NotFound("Prova não encontrada...");
+        }
 
-            return prova;
+        return prova;
     }
 
     [HttpPost]
 
     public ActionResult Post(Prova prova)
     {
-            if (prova is null)
-                return BadRequest();
+        ValidationResult result = _validator.Validate(prova);
 
-            _context.Provas.Add(prova);
-            _context.SaveChanges();
+        if(!result.IsValid)
+        {
+            return BadRequest(result.Errors);
+        }
 
-            return new CreatedAtRouteResult("ObterProva", new { id = prova.ProvaId }, prova);    
+        _context.Provas.Add(prova);
+        _context.SaveChanges();
+
+        return new CreatedAtRouteResult("ObterProva", new { id = prova.ProvaId }, prova);
     }
 
     [HttpPut("{id:int}")]
 
     public ActionResult Put(int id, Prova prova)
     {
-            if (id != prova.ProvaId)
-            {
-                return BadRequest();
-            }
+        if (id != prova.ProvaId)
+        {
+            return BadRequest();
+        }
 
-            _context.Entry(prova).State = EntityState.Modified;
-            _context.SaveChanges();
+        _context.Entry(prova).State = EntityState.Modified;
+        _context.SaveChanges();
 
-            return Ok(prova);   
+        return Ok(prova);
     }
 
     [HttpDelete("{id:int}")]
     public ActionResult Delete(int id)
     {
-            var prova = _context.Provas.FirstOrDefault(p => p.ProvaId == id);
+        var prova = _context.Provas.FirstOrDefault(p => p.ProvaId == id);
 
-            if (prova is null)
-            {
-                return NotFound("Prova não encontrada...");
-            }
+        if (prova is null)
+        {
+            return NotFound("Prova não encontrada...");
+        }
 
-            _context.Remove(prova);
-            _context.SaveChanges();
+        _context.Remove(prova);
+        _context.SaveChanges();
 
-            return Ok(prova);    
+        return Ok(prova);
     }
 }
