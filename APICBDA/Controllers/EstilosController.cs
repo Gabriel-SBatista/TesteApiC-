@@ -20,7 +20,7 @@ public class EstilosController : ControllerBase
 
     public ActionResult<IEnumerable<Estilo>> GetEstiloProva()
     {
-            var estilos = _context.Estilos.Include(p => p.Provas).AsNoTracking().ToList();
+            var estilos = _context.Estilos.Include(p => p.Provas).AsNoTrackingWithIdentityResolution().ToList();
             if (estilos is null)
             {
                 return NotFound();
@@ -33,7 +33,7 @@ public class EstilosController : ControllerBase
     [HttpGet]
     public ActionResult<IEnumerable<Estilo>> Get()
     {
-            var estilos = _context.Estilos.AsNoTracking().ToList();
+            var estilos = _context.Estilos.AsNoTrackingWithIdentityResolution().ToList();
             if (estilos is null)
             {
                 return NotFound();
@@ -45,7 +45,7 @@ public class EstilosController : ControllerBase
     [HttpGet("{id:int}", Name="ObterEstilo")]
     public ActionResult<Estilo> Get(int id)
     {
-            var estilo = _context.Estilos.AsNoTracking().FirstOrDefault(e => e.EstiloId == id);
+            var estilo = _context.Estilos.AsNoTrackingWithIdentityResolution().FirstOrDefault(e => e.EstiloId == id);
             if (estilo is null)
             {
                 return NotFound("Estilo não encontrado...");

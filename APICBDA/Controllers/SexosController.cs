@@ -20,7 +20,7 @@ public class SexosController : ControllerBase
 
     public ActionResult<IEnumerable<Sexo>> Get()
     {
-            var sexos = _context.Sexos.AsNoTracking().ToList();
+            var sexos = _context.Sexos.AsNoTrackingWithIdentityResolution().ToList();
 
             if (sexos is null)
             {
@@ -34,7 +34,7 @@ public class SexosController : ControllerBase
 
     public ActionResult<Sexo> Get(int id)
     {
-            var sexo = _context.Sexos.AsNoTracking().FirstOrDefault(s => s.SexoId == id);
+            var sexo = _context.Sexos.AsNoTrackingWithIdentityResolution().FirstOrDefault(s => s.SexoId == id);
 
             if (sexo is null)
             {

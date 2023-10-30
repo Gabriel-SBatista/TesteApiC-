@@ -24,7 +24,7 @@ public class ProvasController : ControllerBase
 
     public ActionResult<IEnumerable<Prova>> Get()
     {
-        var provas = _context.Provas.AsNoTracking().ToList();
+        var provas = _context.Provas.AsNoTrackingWithIdentityResolution().ToList();
         if (provas is null)
         {
             return NotFound();
@@ -39,7 +39,7 @@ public class ProvasController : ControllerBase
     public ActionResult<Prova> Get(int id)
     {
 
-        var prova = _context.Provas.AsNoTracking().FirstOrDefault(p => p.ProvaId == id);
+        var prova = _context.Provas.AsNoTrackingWithIdentityResolution().FirstOrDefault(p => p.ProvaId == id);
         if (prova is null)
         {
             return NotFound("Prova não encontrada...");
