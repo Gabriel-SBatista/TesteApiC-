@@ -23,6 +23,8 @@ public class ProvaValidator : AbstractValidator<Prova>
 {
     public ProvaValidator()
     {
+        RuleFor(p => p.ProvaId).NotNull();
+        RuleFor(p => p.EstiloId).NotNull();
         RuleFor(p => p.Distancia).GreaterThanOrEqualTo(1);
     }
 }

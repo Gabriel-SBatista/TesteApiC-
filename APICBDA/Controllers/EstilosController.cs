@@ -1,5 +1,7 @@
 ﻿using APICBDA.Context;
 using APICBDA.Models;
+using APICBDA.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,30 +12,35 @@ namespace APICBDA.Controllers;
 public class EstilosController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IValidator<Estilo> _validator;
 
-    public EstilosController(AppDbContext context)
+    public EstilosController(AppDbContext context, IValidator<Estilo> validator)
     {
         _context = context;
+        _validator = validator;
     }
 
     [HttpGet("provas")]
 
     public ActionResult<IEnumerable<Estilo>> GetEstiloProva()
     {
-            var estilos = _context.Estilos.Include(p => p.Provas).AsNoTrackingWithIdentityResolution().ToList();
-            if (estilos is null)
-            {
-                return NotFound();
-            }
+        var application = new EstilosAppServices(_context, _validator);
+        var estilos = application.BuscaProvaEstilos();
 
-            return estilos;
-            
+        if (estilos is null)
+        {
+            return NotFound();
+        }
+
+        return estilos;    
     }
 
     [HttpGet]
     public ActionResult<IEnumerable<Estilo>> Get()
     {
-            var estilos = _context.Estilos.AsNoTrackingWithIdentityResolution().ToList();
+        var application = new EstilosAppServices(_context, _validator);
+        var estilos = application.BuscaEstilos();
+
             if (estilos is null)
             {
                 return NotFound();
@@ -45,7 +52,8 @@ public class EstilosController : ControllerBase
     [HttpGet("{id:int}", Name="ObterEstilo")]
     public ActionResult<Estilo> Get(int id)
     {
-            var estilo = _context.Estilos.AsNoTrackingWithIdentityResolution().FirstOrDefault(e => e.EstiloId == id);
+        var application = new EstilosAppServices(_context, _validator);
+        var estilo = application.BuscaEstilo(id);
             if (estilo is null)
             {
                 return NotFound("Estilo não encontrado...");
@@ -57,46 +65,42 @@ public class EstilosController : ControllerBase
     [HttpPost]
     public ActionResult Post(Estilo estilo)
     {
-            if (estilo is null)
-                return BadRequest();
+        var application = new EstilosAppServices(_context, _validator);
+        var error = application.SalvaEstilo(estilo);
 
+        if (error is null)
+        {
+            return Ok(estilo);
+        }
 
-            _context.Estilos.Add(estilo);
-            _context.SaveChanges();
-
-            return new CreatedAtRouteResult("ObterEstilo", new { id = estilo.EstiloId }, estilo);  
+        return BadRequest(error);
     }
 
     [HttpPut("{id:int}")]
     public ActionResult Put(int id, Estilo estilo)
     {
-            var estiloAntigo = _context.Estilos.Find(id);
-            if (estiloAntigo is null)
-            {
-                return NotFound("Estilo não encontrado...");
-            }
-
-            estiloAntigo.Nome = estilo.Nome;
-
-            _context.Update(estiloAntigo);
-            _context.SaveChanges();
-            return Ok(estiloAntigo);
+        var application = new EstilosAppServices(_context, _validator);
+        var error = application.AtualizaEstilo(id, estilo);
         
+        if (error is null)
+        {
+            return Ok(estilo);
+        }
+
+        return BadRequest(error);
     }
 
     [HttpDelete("{id:int}")]
     public ActionResult Delete(int id)
     {
-            var estilo = _context.Estilos.FirstOrDefault(e => e.EstiloId == id);
+        var application = new EstilosAppServices(_context, _validator);
+        var estilo = application.DeletaEstilo(id);
 
-            if (estilo is null)
-            {
-                return NotFound("Estilo não encontrado...");
-            }
+        if (estilo is null)
+        {
+            return NotFound("Estilo não encontrado...");
+        }
 
-            _context.Remove(estilo);
-            _context.SaveChanges();
-
-            return Ok(estilo);
+        return Ok(estilo);
     }
 }

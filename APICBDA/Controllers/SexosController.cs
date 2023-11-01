@@ -1,5 +1,7 @@
 ﻿using APICBDA.Context;
 using APICBDA.Models;
+using APICBDA.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,17 +12,20 @@ namespace APICBDA.Controllers;
 public class SexosController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IValidator<Sexo> _validator;
 
-    public SexosController(AppDbContext context)
+    public SexosController(AppDbContext context, IValidator<Sexo> validator)
     {
         _context = context;
+        _validator = validator;
     }
 
     [HttpGet]
 
     public ActionResult<IEnumerable<Sexo>> Get()
     {
-            var sexos = _context.Sexos.AsNoTrackingWithIdentityResolution().ToList();
+        var application = new SexosAppServices(_context, _validator);
+        var sexos = application.BuscaSexos();
 
             if (sexos is null)
             {
@@ -34,7 +39,8 @@ public class SexosController : ControllerBase
 
     public ActionResult<Sexo> Get(int id)
     {
-            var sexo = _context.Sexos.AsNoTrackingWithIdentityResolution().FirstOrDefault(s => s.SexoId == id);
+        var application = new SexosAppServices(_context, _validator);
+        var sexo = application.BuscaSexo(id);
 
             if (sexo is null)
             {
@@ -48,45 +54,42 @@ public class SexosController : ControllerBase
 
     public ActionResult Post(Sexo sexo)
     {
-            if(sexo is null)
-            {
-                return BadRequest();
-            }
-            _context.Sexos.Add(sexo);
-            _context.SaveChanges();
+        var application = new SexosAppServices(_context, _validator);
+        var error = application.SalvaSexo(sexo);
 
-            return new CreatedAtRouteResult("ObterSexo", new { id = sexo.SexoId }, sexo);   
+        if (error is null)
+        {
+            return Ok(sexo);
+        }
+
+        return BadRequest(error);
     }
 
     [HttpPut("{id:int}")]
 
     public ActionResult Put(int id, Sexo sexo)
     {
-            if (id != sexo.SexoId)
-            {
-                return BadRequest();
-            }
+        var application = new SexosAppServices(_context, _validator);
+        var error = application.AtualizaSexo(id, sexo);
+        
+        if (error is null)
+        {
+            return Ok(sexo);
+        }
 
-            _context.Entry(sexo).State = EntityState.Modified;
-            _context.SaveChanges();
-
-            return Ok(sexo);    
+        return BadRequest(error);
     }
 
     [HttpDelete("{id:int}")]
 
     public ActionResult Delete(int id)
     {
-            var sexo = _context.Sexos.FirstOrDefault(s => s.SexoId == id);
+        var application = new SexosAppServices(_context, _validator);
+        var sexo = application.DeletaSexo(id);
+        
+        if (sexo is null)
+            return NotFound("Sexo não encontrado...");
 
-            if (sexo is null)
-            {
-                return NotFound("Sexo não encontrado...");
-            }
-
-            _context.Remove(sexo);
-            _context.SaveChanges();
-
-            return Ok(sexo);          
+        return Ok(sexo);
     }
 }

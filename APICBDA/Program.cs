@@ -18,6 +18,8 @@ string sqlServerConnection = builder.Configuration.GetConnectionString("DefaultC
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(sqlServerConnection));
 builder.Services.AddScoped<IValidator<Prova>, ProvaValidator>();
+builder.Services.AddScoped<IValidator<Estilo>, EstiloValidator>();
+builder.Services.AddScoped<IValidator<Sexo>, SexoValidator>();
 
 var app = builder.Build();
 

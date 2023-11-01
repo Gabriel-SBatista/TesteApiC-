@@ -1,5 +1,6 @@
 ﻿using APICBDA.Context;
 using APICBDA.Models;
+using APICBDA.Services;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
@@ -24,22 +25,24 @@ public class ProvasController : ControllerBase
 
     public ActionResult<IEnumerable<Prova>> Get()
     {
-        var provas = _context.Provas.AsNoTrackingWithIdentityResolution().ToList();
+        var application = new ProvasAppServices(_context, _validator);
+        var provas = application.BuscaProvas();
+
         if (provas is null)
         {
             return NotFound();
         }
 
         return provas;
-
     }
 
     [HttpGet("{id:int}", Name = "ObterProva")]
 
     public ActionResult<Prova> Get(int id)
     {
+        var application = new ProvasAppServices(_context, _validator);
+        var prova = application.BuscaProva(id);
 
-        var prova = _context.Provas.AsNoTrackingWithIdentityResolution().FirstOrDefault(p => p.ProvaId == id);
         if (prova is null)
         {
             return NotFound("Prova não encontrada...");
@@ -52,46 +55,42 @@ public class ProvasController : ControllerBase
 
     public ActionResult Post(Prova prova)
     {
-        ValidationResult result = _validator.Validate(prova);
+        var application = new ProvasAppServices(_context, _validator);
+        var error = application.SalvaProva(prova);
 
-        if(!result.IsValid)
+        if (error is null)
         {
-            return BadRequest(result.Errors);
+            return Ok(prova);
         }
 
-        _context.Provas.Add(prova);
-        _context.SaveChanges();
-
-        return new CreatedAtRouteResult("ObterProva", new { id = prova.ProvaId }, prova);
+        return BadRequest(error);
     }
 
     [HttpPut("{id:int}")]
 
     public ActionResult Put(int id, Prova prova)
     {
-        if (id != prova.ProvaId)
+        var application = new ProvasAppServices(_context, _validator);
+        var error = application.AtualizaProva(id, prova);
+
+        if (error is null)
         {
-            return BadRequest();
+            return Ok(prova);
         }
 
-        _context.Entry(prova).State = EntityState.Modified;
-        _context.SaveChanges();
-
-        return Ok(prova);
+        return BadRequest(error);
     }
 
     [HttpDelete("{id:int}")]
     public ActionResult Delete(int id)
     {
-        var prova = _context.Provas.FirstOrDefault(p => p.ProvaId == id);
+        var application = new ProvasAppServices(_context, _validator);
+        var prova = application.DeletaProva(id);
 
         if (prova is null)
         {
             return NotFound("Prova não encontrada...");
         }
-
-        _context.Remove(prova);
-        _context.SaveChanges();
 
         return Ok(prova);
     }
