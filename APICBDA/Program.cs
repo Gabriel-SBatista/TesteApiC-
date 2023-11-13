@@ -1,6 +1,7 @@
 using APICBDA.Context;
 using APICBDA.Middlewares;
 using APICBDA.Models;
+using Azure.Core;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
@@ -17,6 +18,7 @@ builder.Services.AddSwaggerGen();
 string sqlServerConnection = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(sqlServerConnection));
+builder.Services.AddHttpClient();
 builder.Services.AddScoped<IValidator<Prova>, ProvaValidator>();
 builder.Services.AddScoped<IValidator<Estilo>, EstiloValidator>();
 builder.Services.AddScoped<IValidator<Sexo>, SexoValidator>();
@@ -31,6 +33,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware(typeof(ValidationMiddleware));
 
 app.UseAuthorization();
 
